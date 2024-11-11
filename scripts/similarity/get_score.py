@@ -66,6 +66,7 @@ def read_config(filepath):
     `None` if there was an error during the process.
     """
     try:
+        logger.info(f"Reading configuration file: {filepath}")
         with open(filepath) as f:
             config = yaml.safe_load(f)
         return config
@@ -125,7 +126,7 @@ def get_score(resume_string, job_description_string):
 
     documents: List[str] = [resume_string]
     client = QdrantClient(":memory:")
-    client.set_model("BAAI/bge-base-en")
+    client.set_model("BAAI/bge-base-en-v1.5")
 
     client.add(
         collection_name="demo_collection",

@@ -503,6 +503,10 @@ with st.spinner("Please wait..."):
         print("Config file parsed successfully:")
         resume_string = " ".join(selected_file["extracted_keywords"])
         jd_string = " ".join(selected_jd["extracted_keywords"])
+        print("Resume String:", resume_string)
+        print("JD String:", jd_string)
+        print("JD String clean_data:", selected_jd["clean_data"])
+        print("Resume String clean_data:", selected_file["clean_data"])
         result = get_score(resume_string, jd_string)
         similarity_score = round(result[0].score * 100, 2)
 
