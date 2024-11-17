@@ -17,7 +17,7 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET'])
 def home():
-    return "Welcome to the Resume Matcher API!"
+    return "Welcome to the Resume Matcher API with upload file!"
 
 @app.route('/get_score', methods=['POST'])
 def get_score_api():
@@ -125,4 +125,4 @@ def extract_plaintext(object):
 
 if __name__ == '__main__':
     logger.info("Starting the API server...")
-    app.run(debug=True, port=5000, host='0.0.0.0')
+    app.run(debug=True, port=8090, host='0.0.0.0')
