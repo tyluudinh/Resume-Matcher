@@ -4,6 +4,8 @@ from scripts.similarity.get_score import *
 
 from scripts.utils.logger import init_logging_config
 
+from pypdf import PdfReader
+
 init_logging_config(basic_log_level=logging.INFO)
 # Get the logger
 logger = logging.getLogger(__name__)
@@ -20,19 +22,66 @@ def home():
 @app.route('/get_score', methods=['POST'])
 def get_score_api():
     # Parse the incoming JSON request body
-    data = request.get_json()
+    
+    # if the request is application/json
+
+    data = {}
+    
+    if request.is_json:
+        data = request.get_json()
+    # if the request is application/x-www-form-urlencoded
+    elif request.form:
+        data = request.form.to_dict()
+
     jd = data.get('jd', {})
     resume = data.get('resume', {})
+
+    if 'file' in request.files:
+        pdf_file = request.files['file']
+        if not pdf_file.filename.lower().endswith('.pdf'):
+            return jsonify({"error": "Only PDF files are allowed."}), 400
+        try:
+            pdf_text = extract_pdf_content(pdf_file)
+            resume.update({"content_pdf_file": pdf_text})
+        
+        except Exception as e:
+            return jsonify({"error": f"Failed to process PDF: {str(e)}"}), 500
     
     # Basic validation to ensure required fields are present
     if not jd or not resume:
         logger.error("Job description and resume data are required.")
         return jsonify({"error": "Job description and resume data are required."}), 400
     
+    
+    # Validate file type
+    
+    if type(jd) == str:
+        jd = {
+            "content": jd
+        }
+    
     score = calculate_score(jd, resume)
     
     # Return the score as a JSON response
     return jsonify({"score": score})
+
+def extract_pdf_content(pdf_file):
+    """
+    Extracts text content from a PDF file.
+    
+    Parameters:
+    - pdf_file: A file-like object containing the PDF.
+
+    Returns:
+    - str: Extracted text content from the PDF.
+    """
+    pdf_text = ""
+    reader = PdfReader(pdf_file)
+
+    for page in reader.pages:
+        pdf_text += page.extract_text() + "\n"
+
+    return pdf_text.strip()
 
 def calculate_score(jd, resume):
     
